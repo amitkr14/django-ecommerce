@@ -1,0 +1,100 @@
+{% extends 'myapp/base.html' %}
+<!--Comment-->
+
+<!--Comments-->
+<!--Comments-->
+{% load mathfilters %}
+<!--Comment-->
+{% block body %}
+<h2 class="text-3xl font-semibold mb-8 text-gray-800">Your Shopping Cart</h2>
+
+{% if cart_items %}
+<!--Cart Table-->
+  <div class="overflow-x-auto rounded shadow border border-gray-200">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-100 text-sm text-gray-600 uppercase tracking-wider">
+        <tr>
+          <th class="p-4 text-left">Product Image</th>
+          <th class="p-4 text-left">Product</th>
+          <th class="p-4 text-left">Quantity</th>
+          <th class="p-4 text-left">Unit Price</th>
+          <th class="p-4 text-left">Total</th>
+          <th class="p-4 text-left">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        {% for item in cart_items %}
+        <!--Comment-->
+
+        <!--Comment-->
+        {% with product=item.product %}
+        <tr id="item-{{ product.id }}" class="hover:bg-gray-50">
+  
+  <td class="p-4">
+    <img src="{{ product.image.url }}" class="w-20 h-20 object-contain rounded"/>
+  </td>
+
+  <td class="p-4 font-medium">{{ product.name }}</td>
+
+  <td class="p-4">
+    <form action="{% url 'cart_update' product.id %}" method="POST">
+        {% csrf_token %}
+        <input 
+          type="number"
+          name="quantity"  class="qty-input p-2 border rounded w-20 hover:border-blue-500 focus:outline-none transition"
+          value="{{ item.quantity }}"
+          min="1"
+          max="{{ product.stock }}"
+          onchange="this.form.submit()" />
+    </form>
+  </td>
+
+  <td class="p-4">₹{{ product.price }}</td>
+
+  <td id="item-total-{{ product.id }}" class="p-4">
+    ₹{{ item.total_price }}
+  </td>
+
+  <td class="p-4">
+    <form action="{% url 'cart_delete' product.id %}" method="POST">
+        {% csrf_token %}
+        <button 
+          type="submit" 
+          class="delete-btn bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition shadow-sm"
+        >
+          Delete
+        </button>
+    </form>
+  </td>
+
+</tr>
+         
+        
+        {% endwith %}
+        <!--Comment-->
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+<!--End Cart Table-->
+
+<!--Cart Total-->
+<div class="mt-6 text-right pr-2">
+  <strong class="text-lg text-gray-900" id="total"
+    ><h2 class="text-xl font-bold">
+  Total: <span class="text-green-600" id="cart-total">₹{{ cart_total }}</span>
+</h2></strong>
+<div class="flex justify-end mt-8 mb-4">
+    <a href="{% url 'checkout' %}" class="bg-green-600 text-white text-lg font-bold py-3 px-8 rounded shadow-md hover:bg-green-700 transition transform hover:-translate-y-1">
+        Proceed to Checkout 
+    </a>
+</div>
+</div>
+{% else %}
+<!--Empty Cart Message-->
+<p class="text-gray-500 text-center text-lg mt-12">Your cart is empty.</p>
+{% endif %}
+
+
+{% endblock %}

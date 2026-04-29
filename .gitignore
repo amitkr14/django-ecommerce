@@ -1,0 +1,13 @@
+# Passwords and Secrets
+.env
+
+# Virtual Environments
+env/
+venv/
+
+# Database
+db.sqlite3
+
+# Python Cache
+__pycache__/
+*.pyc

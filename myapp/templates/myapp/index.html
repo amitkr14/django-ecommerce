@@ -1,0 +1,56 @@
+{% extends 'myapp/base.html' %}
+
+{% block body %}
+<div>
+    <h1 class="text-2xl px-32 pt-10"> Today's Deals </h1>
+
+    <div class="px-32">
+        <hr class="border-t border-gray-300 my-6"/>
+    </div>
+    <div class="grid grid-cols-4 px-32 gap-6">
+        {% for product in page_obj %}
+        <div class="rounded-lg shadow-lg p-4">
+            <img class="rounded-md mb-4 object-cover mx-auto" src="{{product.image.url}}" alt=""/>
+            <a class="text-lg font-semibold" href="{{product.get_absolute_url}}">{{product.name}}</a>
+            <p class="text-gray-600">{{product.description}}</p>
+            <p class="text-green-600 font-bold mt-2 text-lg">₹{{product.price}}</p>
+
+        </div>
+
+
+        {% endfor %}
+
+    </div>
+</div>
+<div class="flex items-center justify-center mt-12 mb-8">
+    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+        
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}" class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Previous
+            </a>
+        {% else %}
+            <span class="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
+                Previous
+            </span>
+        {% endif %}
+
+        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}" class="relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Next
+            </a>
+        {% else %}
+            <span class="relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-gray-100 text-sm font-medium text-gray-400 cursor-not-allowed">
+                Next
+            </span>
+        {% endif %}
+        
+    </nav>
+</div>
+
+{% endblock %}
+

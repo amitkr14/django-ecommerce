@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script
+      src="https://code.jquery.com/jquery-4.0.0.js"
+      integrity="sha256-9fsHeVnKBvqh3FB2HYu7g2xseAZ5MlN6Kz/qnkASV8U="
+      crossorigin="anonymous"
+    ></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <!--Nav-->
+    <nav
+      class="bg-gray-200 shadow-md px-4 py-2 px-16 flex items-center justify-between"
+    >
+      <!-- Logo -->
+      <div class="flex items-center space-x-2">
+        <!-- <img
+          src="https://via.placeholder.com/40"
+          alt="Logo"
+          class="h-10 w-10"
+        /> -->
+        <span class="text-md font-semibold text-gray-800 px-4"
+          >☰ Categories</span
+        >
+      </div>
+
+      <!-- Navigation Links (Hidden on Mobile) -->
+      <div class="hidden md:flex space-x-6 font-bold text-sm">
+        <a href="{% url 'index' %}" class="text-gray-700 hover:text-blue-600">Home</a>
+        <a href="{% url 'register' %}" class="text-gray-700 hover:text-blue-600">Register</a>
+        <a href="{% url 'admin:index' %}" target="_blank" rel="noopener noreferrer" class="hover:opacity-80 transition duration-150">
+        <i class="fas fa-user text-white"></i>👤 Admin </a>
+      </div>
+
+      <!-- Search Bar -->
+
+      <!-- Icons -->
+      <div class="flex items-center space-x-4 font-bold text-sm">
+        <a href="{% url 'seller_register' %}" class="text-gray-700 hover:text-blue-600"
+          >Sell On IndiaShop</a
+        >
+        <a href="#" class="text-gray-700 hover:text-blue-600"
+          >Track your order</a
+        >
+        <a href="#" class="text-gray-700 hover:text-blue-600">INR</a>
+        <a href="#" class="text-gray-700 hover:text-blue-600">India</a>
+      </div>
+    </nav>
+    <nav
+      class="bg-blue-500 shadow-md px-4 py-3 px-16 flex items-center justify-between"
+    >
+      <!-- Logo -->
+      <div class="flex items-center space-x-2">
+        <!-- <img
+          src="https://via.placeholder.com/40"
+          alt="Logo"
+          class="h-10 w-10"
+        /> -->
+        <span class="text-xl font-semibold text-gray-800 px-4"
+          >India<span class="text-white">Shop</span>
+        </span>
+      </div>
+
+      
+
+      <!-- Search Bar -->
+      <form method="GET" action="{% url 'index' %}" class="flex flex-1 mx-8">
+    
+    <input class="bg-white text-gray-900 w-full" type="text" 
+           name="search" 
+           value="{{ search_query }}" 
+           placeholder="Search products..." 
+           class="w-full px-4 py-2 text-gray-900 rounded-l-md focus:outline-none">
+           
+    <button type="submit" class="bg-gray-900 text-white px-6 py-2 rounded-r-md hover:bg-gray-800 transition">
+        Search
+    </button>
+</form>
+
+      <!-- Icons -->
+      <div class="flex items-center space-x-4">
+        <!-- Search Icon for Mobile -->
+        <button class="md:hidden text-gray-600 hover:text-blue-600">🔍</button>
+
+        <!-- Cart -->
+        <a href="{% url 'cart-overview' %}" class="relative">
+          🛒
+          <span
+            id="cart-qty"
+            class="absolute -top-2 -right-2 text-xs bg-red-500 text-white rounded-full px-1"
+          >{{cart_count}}
+          </span>
+        </a>
+
+        
+         {% if user.is_authenticated %}
+        <a href="{% url 'profile' %}" class="hover:opacity-80 transition duration-150">
+        <i class="fas fa-user text-white"></i>>👤</a>
+         {% endif %}
+        <button class="md:hidden text-gray-600 hover:text-blue-600">☰</button>
+      </div>
+      <div>
+        {% if user.is_authenticated %}
+        <a class="text-white font-bold" href="{% url 'logout' %}">Logout</a>
+        {% else %}
+        <a class="text-white font-bold" href="{% url 'login' %}">Login</a>
+        {% endif %}
+      </div>
+        <button class="md:hidden text-gray-600 hover:text-blue-600">☰</button>
+      </div>
+    </nav>
+    <!--Nav-->
+    {% if messages %}
+    <div id="toast-container" class="fixed top-20 right-5 z-50 flex flex-col space-y-3 pointer-events-none">
+        
+        {% for message in messages %}
+            <div class="toast-message px-6 py-3 rounded-lg shadow-xl text-white font-medium transform transition-all duration-500 ease-in-out translate-x-0 opacity-100
+                {% if message.tags == 'error' %} bg-red-500 
+                {% elif message.tags == 'success' %} bg-green-500 
+                {% else %} bg-blue-500 {% endif %}">
+                
+                {{ message }}
+                
+            </div>
+        {% endfor %}
+        
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Find all the messages we just drew on the screen
+            const toasts = document.querySelectorAll('.toast-message');
+            
+            toasts.forEach(toast => {
+                // Wait 3.5 seconds, then trigger the fade out animation
+                setTimeout(() => {
+                    toast.classList.remove('opacity-100', 'translate-x-0');
+                    toast.classList.add('opacity-0', 'translate-x-full'); // Slides it off to the right
+                    
+                    // completely remove it from the HTML after the animation finishes
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 500);
+                }, 3500);
+            });
+        });
+    </script>
+{% endif %}
+    {% block body %}
+    
+
+    {% endblock %}
+  </body>
+</html>

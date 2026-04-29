@@ -1,0 +1,9 @@
+{% extends 'myapp/base.html' %}
+{% block body %}
+<h1>Add Address</h1>
+<form aaction="" method="POST">
+    {% csrf_token %}
+    {{form}}
+    <button type="submit">Save Address</button>
+</form>
+{% endblock %} 

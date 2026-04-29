@@ -1,0 +1,118 @@
+{% extends 'myapp/base.html' %}
+
+{% block body %}
+<div class="max-w-md mx-auto mt-10 bg-white p-8 border rounded shadow">
+    <h2 class="text-2xl font-bold mb-4">Complete Your Order</h2>
+    <p class="text-gray-600 mb-6">Total Amount: <span class="font-bold text-green-600">₹{{ cart_total }}</span></p>
+    
+    <button id="pay-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded hover:bg-blue-700 transition">
+        Pay with Razorpay
+    </button>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+    // 1. Django's standard function to securely grab the CSRF cookie
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    document.getElementById('pay-btn').onclick = function(e) {
+        e.preventDefault();
+        
+        const payBtn = document.getElementById('pay-btn');
+        payBtn.innerText = "Processing...";
+        payBtn.disabled = true;
+
+        // PHASE 1: Call your Django API to create the order
+        fetch('/api/payment/create/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // 2. We use the CSRF token here instead of the JWT placeholder!
+                'X-CSRFToken': csrftoken 
+            },
+            body: JSON.stringify({}) 
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                
+                // PHASE 2: Open the Razorpay Popup
+                var options = {
+                    "key": "rzp_test_ShnUGvKcTBzcwT", // MAKE SURE YOUR TEST KEY IS HERE
+                    "amount": data.amount,           
+                    "currency": data.currency,
+                    "name": "IndiaShop",
+                    "description": "Purchase from IndiaShop",
+                    "order_id": data.razorpay_order_id, 
+                    
+                    // PHASE 3: Verify the payment
+                    "handler": function (response) {
+                        alert("Payment successful! Verifying with server...");
+                        
+                        fetch('/api/payment/verify/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                // Include CSRF here too!
+                                'X-CSRFToken': csrftoken
+                            },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(verifyData => {
+                            if (verifyData.status === 'Payment Successful!') {
+                                alert("Order Placed Successfully!");
+                                window.location.href = '/'; 
+                            } else {
+                                alert("Payment verification failed!");
+                            }
+                        });
+                    },
+                    "theme": {
+                        "color": "#2563EB" 
+                    }
+                };
+                
+                var rzp1 = new Razorpay(options);
+                rzp1.open();
+                
+                rzp1.on('payment.failed', function (response){
+                    alert("Payment cancelled or failed.");
+                    payBtn.innerText = "Pay with Razorpay";
+                    payBtn.disabled = false;
+                });
+                
+            } else {
+                // If the backend sends an error message, show it to the user!
+                alert("Server Error: " + (data.error || "Failed to create order."));
+                payBtn.innerText = "Pay with Razorpay";
+                payBtn.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            payBtn.innerText = "Pay with Razorpay";
+            payBtn.disabled = false;
+        });
+    };
+</script>
+{% endblock %}
