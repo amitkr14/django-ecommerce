@@ -15,34 +15,23 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path,include
+from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
-schema_view = get_schema_view(
-   openapi.Info(
-      title="IndiaShop API",
-      default_version='v1',
-      description="Official API documentation for the IndiaShop E-Commerce platform.",
-      terms_of_service="https://www.google.com/policies/terms/",
-      contact=openapi.Contact(email="contact@indiashop.local"),
-      license=openapi.License(name="BSD License"),
-   ),
-   public=True,
-   permission_classes=(permissions.AllowAny,),
-)
+# Import ONLY the modern spectacular views
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('',include('myapp.urls')),
-    path('cart/',include('cart.urls')),
+    path('', include('myapp.urls')),
+    path('cart/', include('cart.urls')),
     path('users/', include('users.urls')),
-    path('orders/',include('orders.urls')),
+    path('orders/', include('orders.urls')),
+    
+    # 1. This generates the raw JSON schema
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    
     # 2. This creates the beautiful, interactive visual UI!
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
