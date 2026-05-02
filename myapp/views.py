@@ -25,6 +25,13 @@ from cart.cart import Cart
 from django.db import transaction
 from django.core.cache import cache
 from .tasks import send_payment_receipt
+from .serializers import ProductSerializer
+import redis
+import json
+from django.conf import settings
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import Product
 
 def customer_only(view_func):
     @wraps(view_func)
@@ -95,13 +102,15 @@ def detail(request,slug):
     return render(request,'myapp/detail.html',{'product':product})
 
 
-@login_required(login_url='login') 
+@login_required(login_url='seller_login') 
+@seller_only 
 def add_product(request):
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
             new_product = form.save(commit=False)
             new_product.active = True 
+            new_product.seller = request.user
             new_product.save()
             messages.success(request, f"'{new_product.name}' was successfully added to IndiaShop!")
             return redirect('index') 
@@ -369,3 +378,23 @@ def product_list(request):
         print("CACHE HIT: Served instantly from Redis RAM!")
 
     return render(request, 'myapp/index.html', {'products': products}) 
+
+redis_client = redis.StrictRedis.from_url(settings.LOCAL_REDIS_URL, decode_responses=True)
+
+class SimilarProductsView(APIView):
+    def get(self, request, product_id):
+        # 1. Ask Redis for the similar IDs
+        redis_key = f"product:{product_id}:similar"
+        cached_ids = redis_client.get(redis_key)
+        
+        if not cached_ids:
+            return Response({"message": "Recommendations not generated yet."}, status=202)
+            
+        similar_ids = json.loads(cached_ids)
+        
+        # 2. Fetch those specific products from PostgreSQL
+        products = Product.objects.filter(id__in=similar_ids)
+        
+        # 3. Serialize and return
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data)

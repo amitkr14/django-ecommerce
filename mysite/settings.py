@@ -15,6 +15,7 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
+LOCAL_REDIS_URL = os.environ.get('LOCAL_REDIS_URL')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -89,11 +90,11 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'ecom_db',           # Replace with your newly created DB name
-        'USER': 'postgres',          # Replace with your PostgreSQL username
-        'PASSWORD': 'Password@123', # Replace with your PostgreSQL password
-        'HOST': 'localhost',         # Usually 'localhost' for local development
-        'PORT': '5432',              # Default PostgreSQL port
+        'NAME': 'ecom_db',
+        'USER': 'postgres',
+        'PASSWORD': 'Password@123',
+        'HOST': 'localhost', 
+        'PORT': '5432',
     }
 }
 
@@ -122,12 +123,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Kolkata' 
 
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
@@ -168,7 +168,7 @@ CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
         # Use the variable instead of the string!
-        "LOCATION": os.getenv('REDIS_URL'), 
+        "LOCATION": LOCAL_REDIS_URL, 
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }

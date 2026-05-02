@@ -1,11 +1,12 @@
 
 from django.urls import path
 from . import views
+from .views import SimilarProductsView
 
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('<slug:slug>',views.detail,name='detail'),
+    path('<slug:slug>/',views.detail,name='detail'),
     path('sell/', views.add_product, name='add_product'),
     path('api/products/', views.api_products, name='api_products'),
     path('api/products/<int:pk>/', views.api_product_detail, name='api_product_detail'),
@@ -19,4 +20,5 @@ urlpatterns = [
 
     path('api/payment/create/', views.create_razorpay_order, name='create_razorpay_order'),
     path('api/payment/verify/', views.verify_payment, name='verify_payment'),
+    path('api/products/<int:product_id>/similar/', SimilarProductsView.as_view(), name='similar-products'),
 ]

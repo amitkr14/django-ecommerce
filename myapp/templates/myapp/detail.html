@@ -62,32 +62,16 @@
                     🔒 Secure transaction directly via IndiaShop
                 </p>
             </div>
+            
 
         </div>
     </div>
-</div>
-    <!-- <div class="col-span-1 border rounded-lg p-6 space-y-4 shadow-md">
-        <p class="text-2xl font-semibold text-green-600">₹{{product.price}}</p>
-        <div>
-            <select name="" id="select">
-                <option value="">1</option>
-                <option value="">2</option>
-                <option value="">3</option>
-            </select>
+    <div class="mt-16 border-t border-gray-200 pt-8">
+        <h3 class="text-2xl font-bold text-gray-900 mb-6">Similar Items You Might Like</h3>
+        <div id="similar-products-container" class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <p class="text-gray-500 italic" id="loading-text">Finding the best matches...</p>
         </div>
-        <p class="text-sm text-green-700">FREE delivery by tomorrow</p>
-        {% if product.stock %}
-        <p class="text-sm text-green-700"> In Stock</p>
-        {% else %}
-        <p class="text-sm text-green-700"> Out Of Stock </p>
-        {% endif %}
-        <button id="atc" value="{{product.id}}" class="w-full bg-yellow-400 text-black font-semibold py-2 rounded-lg">Add to cart</button>
-        <button class="w-full bg-black text-white font-semibold py-2 rounded-lg">Buy Now</button>
-        <p class="text-sm text-gray-600 font-medium">
-            Sold by: Amit Official Store
-        </p>
-
-    </div> -->
+    </div>
 </div>
 <script>
     $(document).on("click","#atc",function(e) {
@@ -105,6 +89,46 @@
                 document.getElementById("cart-qty").textContent=json.qty;
             }
         });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const currentProductId = "{{ product.id }}"; 
+        const container = document.getElementById("similar-products-container");
+        const loadingText = document.getElementById("loading-text");
+
+        fetch(`/api/products/${currentProductId}/similar/`)
+            .then(response => response.json())
+            .then(data => {
+                loadingText.style.display = "none";
+                container.innerHTML = ""; 
+
+                if (data.message) {
+                    container.innerHTML = `<p class="text-gray-500 italic">Recommendations are currently being generated...</p>`;
+                    return;
+                }
+
+                data.forEach(product => {
+                    const productCard = `
+                        <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden flex flex-col hover:shadow-md transition duration-200 transform hover:-translate-y-1">
+                            <img src="${product.image}" alt="${product.name}" class="w-full h-48 object-cover border-b border-gray-100">
+                            <div class="p-4 flex flex-col flex-grow">
+                                <h5 class="text-md font-semibold text-gray-800 mb-1 truncate">${product.name}</h5>
+                                <p class="text-green-600 font-bold mb-4">₹${product.price}</p>
+                                
+                                <a href="/${product.slug}/" class="mt-auto block w-full text-center border border-gray-300 hover:bg-gray-50 text-gray-800 font-semibold py-2 rounded-md transition text-sm">
+                                    View Product
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += productCard;
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching similar products:", error);
+                loadingText.innerHTML = "Could not load recommendations.";
+            });
     });
 </script>
 
