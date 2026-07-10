@@ -14,6 +14,13 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from dotenv import load_dotenv  # Add this import
+
+
+load_dotenv()
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 LOCAL_REDIS_URL = os.environ.get('LOCAL_REDIS_URL')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -136,12 +143,19 @@ STATIC_URL = 'static/'
 
 MEDIA_ROOT = BASE_DIR/'media'
 MEDIA_URL = '/media/'
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST ='smtp.gmail.com'
-EMAIL_PORT = '587'
-EMAIL_USE_TLS = 'True'
-EMAIL_HOST_USER ='amitbju4@gmail.com'
-EMAIL_HOST_PASSWORD = "autgmvtkrzpytpxn"
+
+
+# Safely pull credentials and region from the environment variables (.env file)
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+
+# The region endpoint updates automatically based on the name above
+AWS_SES_REGION_NAME = os.environ.get('AWS_SES_REGION_NAME', 'us-east-1')
+AWS_SES_REGION_ENDPOINT = f'email.{AWS_SES_REGION_NAME}.amazonaws.com'
+
+# Tell Django to use django-ses as the email provider
+EMAIL_BACKEND = 'django_ses.SESBackend'
+DEFAULT_FROM_EMAIL = os.environ.get('AWS_SES_FROM_EMAIL', 'amitbju4@gmail.com')
 
 
 
@@ -175,8 +189,8 @@ CACHES = {
     }
 }
 
-CELERY_BROKER_URL = os.getenv('REDIS_URL')
-CELERY_RESULT_BACKEND = os.getenv('REDIS_URL')
+CELERY_BROKER_URL = os.getenv('LOCAL_REDIS_URL')
+CELERY_RESULT_BACKEND = os.getenv('LOCAL_REDIS_URL')
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
